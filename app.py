@@ -6,10 +6,10 @@ import base64
 # ------------------- PAGE SETUP ---------------------------
 st.set_page_config(page_title="Break Ring Dashboard",
                    layout='wide',
+                   initial_sidebar_state='collapsed'
                    )
 
 # ---- HEADER WITH LOGOS ----
-# Read the images as binary
 with open("assets/logoHuawei.jpg", "rb") as img_file:
     image_1 = base64.b64encode(img_file.read()).decode()
 
@@ -43,25 +43,47 @@ if uploaded_file:
     
     # ----------------- DATASET --------------------
     df = pd.read_excel(io=uploaded_file,
-                    engine='openpyxl')
+                       engine='openpyxl')
     
     df['Plan MOS'] = df['Plan MOS'].replace('May Plan', 'May')
+    df['Subcon'] = df['Subcon'].str.upper()
 
-    # ---- SIDEBAR ----
-    st.sidebar.header("Please Filter Here:")
-    ring_id = st.sidebar.multiselect(
-        "Break Ring Status:",
-        options=df['Break Ring Status'].unique(),
-    )
+    # --------- SIDEBAR -------------
+    col1, col2 = st.columns([3, 1])
+
+    with col2:
+        st.header("Please Filter Here:", anchor=False)
+        
+        ring_id = st.multiselect(
+            "Break Ring Status:",
+            options=df['Break Ring Status'].unique(),
+        )
+        
+        subcon = st.multiselect(
+            "Subcon:",
+            options=df['Subcon'].unique(),
+        )
+        
+        site_id = st.multiselect(
+            "Site ID:",
+            options=df['Site ID'].unique(),
+        )
 
     # ---------- DATA FILTERING -------------
+    df_selection = df.copy()
+    
     if ring_id:
         df_selection = df[df['Break Ring Status'].isin(ring_id)]
-    else:
-        df_selection = df.copy()
 
-    # Display the filtered DataFrame in the Streamlit app
-    st.dataframe(df_selection)
+    if subcon:
+        df_selection = df[df['Subcon'].isin(subcon)]
+
+    if site_id:
+        df_selection = df[df['Site ID'].isin(site_id)]
+        
+    with col1:
+        st.dataframe(df_selection)
+
     
     # ---------- DATA VISUALIZATION -------------
     st.title("Dashboard", anchor=False)
