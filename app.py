@@ -45,7 +45,7 @@ if 'new_df' not in st.session_state:
     st.session_state.new_df = pd.DataFrame()
 
 # ------------------- UPLOAD FILE --------------------------
-# uploaded_files = st.file_uploader("", type=["xlsx"], accept_multiple_files=True)
+uploaded_files = st.file_uploader("", type=["xlsx"], accept_multiple_files=True)
 
 if uploaded_files:
     if st.button('Upload'):
