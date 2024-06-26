@@ -1,7 +1,9 @@
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 import base64
+
+from process.dataViz import DataVisualization
+from process.dataProcess import DataProcessing
 
 # ------------------- PAGE SETUP ---------------------------
 st.set_page_config(page_title="Break Ring Dashboard",
@@ -36,111 +38,67 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Initialize session state
+if 'dataframes' not in st.session_state:
+    st.session_state.dataframes = None
+if 'new_df' not in st.session_state:
+    st.session_state.new_df = pd.DataFrame()
+
 # ------------------- UPLOAD FILE --------------------------
-uploaded_file = st.file_uploader("", type=["xlsx"])
+uploaded_files = st.file_uploader("", type=["xlsx"], accept_multiple_files=True)
 
-if uploaded_file:
-    
-    # ----------------- DATASET --------------------
-    df = pd.read_excel(io=uploaded_file,
-                       engine='openpyxl')
-    
-    df['Plan MOS'] = df['Plan MOS'].replace('May Plan', 'May')
-    df['Subcon'] = df['Subcon'].str.upper()
+if uploaded_files:
+    if st.button('Upload'):
+        dataframes = []
+        for file in uploaded_files:
+            excel_file = pd.ExcelFile(file)
+            if 'Master Data' in excel_file.sheet_names:
+                df = pd.read_excel(file, sheet_name='Master Data', skiprows=[0])
+            else:
+                df = pd.read_excel(file, skiprows=[0])
+            dataframes.append(df)
+        
+        st.session_state.dataframes = dataframes
+        st.session_state.new_df = DataProcessing(dataframes)
 
-    # --------- SIDEBAR -------------
-    col1, col2 = st.columns([3, 1])
+# This is for filtering
+col1, col2 = st.columns([3, 1])
 
+if st.session_state.new_df is not None and not st.session_state.new_df.empty:
     with col2:
         st.header("Please Filter Here:", anchor=False)
         
         ring_id = st.multiselect(
-            "Break Ring Status:",
-            options=df['Break Ring Status'].unique(),
+            "Break Ring Status",
+            options=st.session_state.new_df['Break Ring Status'].unique(),
         )
         
         subcon = st.multiselect(
-            "Subcon:",
-            options=df['Subcon'].unique(),
+            "Subcon",
+            options=st.session_state.new_df['Subcon'].unique(),
         )
-        
-        site_id = st.multiselect(
-            "Site ID:",
-            options=df['Site ID'].unique(),
+        state = st.multiselect(
+            "State Name",
+            options=st.session_state.new_df['State'].unique(),
+        )
+        region = st.multiselect(
+            "Region",
+            options=st.session_state.new_df['Region'].unique(),
         )
 
     # ---------- DATA FILTERING -------------
-    df_selection = df.copy()
+    df_selection = st.session_state.new_df.copy()
     
     if ring_id:
-        df_selection = df[df['Break Ring Status'].isin(ring_id)]
-
+        df_selection = df_selection[df_selection['Break Ring Status'].isin(ring_id)]
     if subcon:
-        df_selection = df[df['Subcon'].isin(subcon)]
-
-    if site_id:
-        df_selection = df[df['Site ID'].isin(site_id)]
+        df_selection = df_selection[df_selection['Subcon'].isin(subcon)]
+    if state:
+        df_selection = df_selection[df_selection['State'].isin(state)]
+    if region:
+        df_selection = df_selection[df_selection['Region'].isin(region)]
         
     with col1:
         st.dataframe(df_selection)
-
     
-    # ---------- DATA VISUALIZATION -------------
-    st.title("Dashboard", anchor=False)
-
-    # ---- BREAK RING STATUS ----
-    status_counts = df['Break Ring Status'].value_counts().reset_index()
-    status_counts.columns = ['Status', 'Count']
-
-    # Create a pie chart
-    fig = px.pie(
-        status_counts,
-        names='Status',
-        values='Count',
-        title='Break Ring Status'
-    )
-
-    # Display the pie chart in the Streamlit app
-    st.plotly_chart(fig)
-    
-    # ---- DATE COUNT ----    
-    categories = {
-        'Survey': ['Plan Survey', 'Actual Survey'],
-        'MOS': ['Plan MOS', 'Actual MOS'],
-        'Installation': ['Plan Installation', 'Actual Installation'],
-        'PowerUp': ['Plan Power Up', 'Actual Power Up'],
-        'Integration': ['Plan Integration', 'Actual Integration'],
-        'Migration': ['Plan Migration', 'Actual Migration'],
-    }
-
-    def create_bar_graph(df, category, plan_col, actual_col):
-        plan_counts = df[plan_col].value_counts().reset_index()
-        plan_counts.columns = ['Month', 'Count']
-        plan_counts['Type'] = plan_col
-
-        actual_counts = df[actual_col].value_counts().reset_index()
-        actual_counts.columns = ['Month', 'Count']
-        actual_counts['Type'] = actual_col
-
-        combined_counts = pd.concat([plan_counts, actual_counts])
-
-        fig = px.bar(
-            combined_counts,
-            x='Month',
-            y='Count',
-            color='Type',
-            barmode='group',
-            title=f"{category} Plan vs Actual"
-        )
-        
-        return fig
-
-    col1, col2 = st.columns(2)
-    col_index = 0
-    for category, (plan_col, actual_col) in categories.items():
-        fig = create_bar_graph(df, category, plan_col, actual_col)
-        if col_index % 2 == 0:
-            col1.plotly_chart(fig)
-        else:
-            col2.plotly_chart(fig)
-        col_index += 1
+    DataVisualization(df_selection)

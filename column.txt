@@ -1,0 +1,32 @@
+Column arrangement:
+
+1. Ring DUID (Primary key)
+2. DUID / Activity Name
+3. Batch
+4. Priority (all column P1 (Q1, Q2, Q3, Aug, Oct) : red
+                P2 : yellow
+                P3: green)
+5. Site ID
+6. Site Name
+7. Region
+8. State
+9. Subcon
+10. CME Type
+11. CME Status
+12. Plan Survey 
+13. Actual Survey
+14. Plan MOS
+15. Actual MOS
+16. Plan Installation*
+17. Actual Installation*
+18. QCTE*
+19. Plan Power up
+20. Actual Power up
+21. Plan Integration
+22. Actual Integration
+23. Plan Migration
+24. Actual Migration
+25. Break Ring Status
+26. PO ES Date
+27. PO EQ Date
+
