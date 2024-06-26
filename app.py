@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import base64
+import openpyxl
 
 from process.dataViz import DataVisualization
 from process.dataProcess import DataProcessing
