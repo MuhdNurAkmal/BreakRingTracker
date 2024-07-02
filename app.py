@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 import base64
-
+from st_aggrid import AgGrid, GridOptionsBuilder
 from process.dataViz import DataVisualization
 from process.dataProcess import DataProcessing
 
@@ -12,11 +12,11 @@ st.set_page_config(page_title="Break Ring Dashboard",
                    )
 
 # ---- HEADER WITH LOGOS ----
-with open("assets/logoHuawei.jpg", "rb") as img_file:
-    image_1 = base64.b64encode(img_file.read()).decode()
+with open("assets/logoHuawei.png", "rb") as img_file:
+    huawei_logo = base64.b64encode(img_file.read()).decode()
 
 with open("assets/CDBLogo.png", "rb") as img_file:
-    image_2 = base64.b64encode(img_file.read()).decode()
+    cd_logo = base64.b64encode(img_file.read()).decode()
 
 st.markdown(
     f"""
@@ -31,8 +31,8 @@ st.markdown(
     }}
     </style>
     <div class="header">
-        <img src="data:image/png;base64,{image_1}" height="20rem" alt="Logo 1">
-        <img src="data:image/png;base64,{image_2}" height="20rem" alt="Logo 2">
+        <img src="data:image/png;base64,{huawei_logo}" height="20rem" alt="Logo 1">
+        <img src="data:image/png;base64,{cd_logo}" height="20rem" alt="Logo 2">
     </div>
     """,
     unsafe_allow_html=True
@@ -56,16 +56,15 @@ if uploaded_files:
                 df = pd.read_excel(file, sheet_name='Master Data', skiprows=[0])
             else:
                 df = pd.read_excel(file, skiprows=[0])
-            dataframes.append(df)
+            dataframes.append({file.name : df})
         
         st.session_state.dataframes = dataframes
         st.session_state.new_df = DataProcessing(dataframes)
 
-# This is for filtering
-col1, col2 = st.columns([3, 1])
+col1, col2 = st.columns([1, 3])
 
 if st.session_state.new_df is not None and not st.session_state.new_df.empty:
-    with col2:
+    with col1:
         st.header("Please Filter Here:", anchor=False)
         
         ring_id = st.multiselect(
@@ -98,7 +97,7 @@ if st.session_state.new_df is not None and not st.session_state.new_df.empty:
     if region:
         df_selection = df_selection[df_selection['Region'].isin(region)]
         
-    with col1:
-        st.dataframe(df_selection)
+    with col2:
+        st.dataframe(df_selection, hide_index=True)
     
-    DataVisualization(df_selection)
+    DataVisualization(st.session_state.new_df)

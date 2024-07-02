@@ -7,26 +7,17 @@ def DataProcessing(dataframes):
     
     processed_df = []
     print(dataframes)
-    for df in dataframes:
-        if 'DUID2' in df.columns:
-            df = df.rename(columns = {'DUID2':'DUID / Activity Name'})
-        if 'ACTIVITY NAME' in df.columns:
-            df = df.rename(columns = {'ACTIVITY NAME':'DUID / Activity Name'})
-        
-        processed_df.append(df)
+    for file_dict in dataframes:
+        for filename, df in file_dict.items():
+            if 'DUID2' in df.columns:
+                df = df.rename(columns = {'DUID2':'DUID / Activity Name'})
+            if 'ACTIVITY NAME' in df.columns:
+                df = df.rename(columns = {'ACTIVITY NAME':'DUID / Activity Name'})
+
+            df['Source'] = filename.split('.')[0]
+            processed_df.append(df)
         
     merged_df = pd.concat(processed_df, ignore_index=True)
-    
-    selected_column = ['Batch', 'Break Ring Status', 'CD EQ PO Date', 'CD ES PO Date',
-                       'CME Type', 'DUID / Activity Name',
-                       'Integrated Date (30days + install)', 'Integration',
-                       'Material On Site (MOS)', 'Plan Integration', 'Plan MOS',
-                       'Plan Power Up', 'Plan Survey Date', 'Power Up ',
-                       'Priority Rollout (colour)', 'Region', 'Ring ID',
-                       'SWAP/MIGRATION \nCOMPLETION DATE', 'SWAP/MIGRATION PLAN DATE',
-                       'Site ID', 'Site Name', 'State', 'Status', 'Subcon',
-                       'Survey Completed', 'Survey Date', 'Survey Plan'
-                       ]
     
     merged_df.rename(columns = {'Priority Rollout (colour)' : 'Priority',
                                 'Status' : 'CME Status',
@@ -42,6 +33,7 @@ def DataProcessing(dataframes):
                                 }, inplace = True)
     
     merged_df = merged_df[['Ring ID','DUID / Activity Name',
+                           'Source',
                            'Batch', 'Priority',
                            'Site ID', 'Site Name',
                            'Region', 'State',
@@ -55,14 +47,17 @@ def DataProcessing(dataframes):
                            'Plan Integration', 'Actual Integration',
                            'Plan Migration', 'Actual Migration',
                            'Break Ring Status',
-                           'PO ES Date', 'PO EQ Date'
+                           'PO ES Date', 'PO EQ Date',
                            ]]
     
-    # Data Tranformation
     merged_df = merged_df.fillna('N/A')
     merged_df['Break Ring Status'] = merged_df['Break Ring Status'].replace('completed', 'Completed')
-    columns_to_capitalize = ['Subcon', 'Region', 'State']
+    merged_df['Subcon'] = merged_df['Subcon'].str.upper()
+    columns_to_capitalize = ['Region', 'State']
     for col in columns_to_capitalize:
-        merged_df[col] = merged_df[col].str.capitalize()
+        merged_df[col] = merged_df[col].str.title()
+    merged_df[['Region', 'State']] = merged_df[['Region', 'State']].replace('Tba', 'TBA')
+    
+    merged_df.sort_values(by=['Ring ID'], inplace=True)
     
     return merged_df

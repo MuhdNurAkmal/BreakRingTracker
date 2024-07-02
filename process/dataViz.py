@@ -19,8 +19,6 @@ def DataVisualization(df) :
         title='Break Ring Status',
         hole=0.3
     )
-
-    # Display the pie chart in the Streamlit app
     st.plotly_chart(fig)
 
     # ---- DATE COUNT ----    
@@ -60,7 +58,7 @@ def DataVisualization(df) :
             title=f"{category} Plan vs Actual"
         )
         
-        fig.update_xaxes(type='category')  # Ensure month labels are treated as categories
+        fig.update_xaxes(type='category') 
         
         return fig
 
@@ -73,7 +71,3 @@ def DataVisualization(df) :
         else:
             col2.plotly_chart(fig)
         col_index += 1
-
-# Example usage:
-# Assuming 'df' is your pandas DataFrame containing the data
-# DataVisualization(df)
