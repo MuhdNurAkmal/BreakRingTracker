@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 import base64
-from st_aggrid import AgGrid, GridOptionsBuilder
 from process.dataViz import DataVisualization
 from process.dataProcess import DataProcessing
 
