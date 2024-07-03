@@ -2,9 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-def DataProcessing(dataframes):
-    st.title("DataFrame", anchor=False)
-    
+def DataProcessing(dataframes):    
     processed_df = []
     print(dataframes)
     for file_dict in dataframes:

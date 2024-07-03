@@ -5,12 +5,8 @@ from process.dataViz import DataVisualization
 from process.dataProcess import DataProcessing
 
 # ------------------- PAGE SETUP ---------------------------
-st.set_page_config(page_title="Break Ring Dashboard",
-                   layout='wide',
-                   initial_sidebar_state='collapsed'
-                   )
+st.set_page_config(page_title="Break Ring Dashboard", layout='wide')
 
-# ---- HEADER WITH LOGOS ----
 with open("assets/logoHuawei.png", "rb") as img_file:
     huawei_logo = base64.b64encode(img_file.read()).decode()
 
@@ -22,29 +18,40 @@ st.markdown(
     <style>
     .header {{
         display: flex;
+        justify-content: space-between;
         align-items: center;
     }}
-    .header img {{
-        height: 7rem;
-        margin-right: 2rem;
+    .title h1 {{
+        font-size: 3rem;
+    }}
+    .logo {{
+        display: flex;
+    }}
+    .logo img {{
+        height: 6rem;
+        margin-right: 1rem;
     }}
     </style>
+    
     <div class="header">
-        <img src="data:image/png;base64,{huawei_logo}" height="20rem" alt="Logo 1">
-        <img src="data:image/png;base64,{cd_logo}" height="20rem" alt="Logo 2">
+        <div class="title">
+            <h1>Break Ring Tracker
+        </div>
+        <div class="logo">
+            <img src="data:image/png;base64,{huawei_logo}">
+            <img src="data:image/png;base64,{cd_logo}">
+        </div>
     </div>
-    """,
-    unsafe_allow_html=True
-)
+    <hr>
+    """, unsafe_allow_html=True)
 
-# Initialize session state
 if 'dataframes' not in st.session_state:
     st.session_state.dataframes = None
 if 'new_df' not in st.session_state:
     st.session_state.new_df = pd.DataFrame()
 
 # ------------------- UPLOAD FILE --------------------------
-uploaded_files = st.file_uploader("", type=["xlsx"], accept_multiple_files=True)
+uploaded_files = st.file_uploader("", type=['xlsx', 'csv'], accept_multiple_files=True)
 
 if uploaded_files:
     if st.button('Upload'):
@@ -60,12 +67,13 @@ if uploaded_files:
         st.session_state.dataframes = dataframes
         st.session_state.new_df = DataProcessing(dataframes)
 
+st.markdown(f"""<hr>""", unsafe_allow_html=True)
+# ------------------- DATA FILTER --------------------------
 col1, col2 = st.columns([1, 3])
 
 if st.session_state.new_df is not None and not st.session_state.new_df.empty:
     with col1:
-        st.header("Please Filter Here:", anchor=False)
-        
+        st.write("Filter")        
         ring_id = st.multiselect(
             "Break Ring Status",
             options=st.session_state.new_df['Break Ring Status'].unique(),
@@ -99,4 +107,5 @@ if st.session_state.new_df is not None and not st.session_state.new_df.empty:
     with col2:
         st.dataframe(df_selection, hide_index=True)
     
+    st.markdown(f"""<hr>""", unsafe_allow_html=True)
     DataVisualization(st.session_state.new_df)
