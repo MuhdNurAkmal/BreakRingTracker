@@ -106,6 +106,7 @@ if st.session_state.new_df is not None and not st.session_state.new_df.empty:
         
     with col2:
         st.dataframe(df_selection, hide_index=True)
+        
     
     st.markdown(f"""<hr>""", unsafe_allow_html=True)
     DataVisualization(st.session_state.new_df)
