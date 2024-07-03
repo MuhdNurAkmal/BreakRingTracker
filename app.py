@@ -67,7 +67,7 @@ if uploaded_files:
         st.session_state.dataframes = dataframes
         st.session_state.new_df = DataProcessing(dataframes)
 
-st.markdown(f"""<hr>""", unsafe_allow_html=True)
+    st.markdown(f"""<hr>""", unsafe_allow_html=True)
 # ------------------- DATA FILTER --------------------------
 col1, col2 = st.columns([1, 3])
 
