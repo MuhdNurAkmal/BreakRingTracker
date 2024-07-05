@@ -4,7 +4,6 @@ import numpy as np
 
 def DataProcessing(dataframes):    
     processed_df = []
-    print(dataframes)
     for file_dict in dataframes:
         for filename, df in file_dict.items():
             if 'DUID2' in df.columns:

@@ -1,8 +1,11 @@
 import pandas as pd
 import streamlit as st
 import base64
-from process.dataViz import DataVisualization
+import plotly.express as px
+
+from process.dataViz import Dashboard
 from process.dataProcess import DataProcessing
+from process.dataFilter import CreateMultiselect, DataFiltering
 
 # ------------------- PAGE SETUP ---------------------------
 st.set_page_config(page_title="Break Ring Dashboard", layout='wide')
@@ -50,7 +53,7 @@ if 'dataframes' not in st.session_state:
 if 'new_df' not in st.session_state:
     st.session_state.new_df = pd.DataFrame()
 
-# ------------------- UPLOAD FILE --------------------------
+################################ FILE UPLOADER ################################
 uploaded_files = st.file_uploader("", type=['xlsx', 'csv'], accept_multiple_files=True)
 
 if uploaded_files:
@@ -66,47 +69,26 @@ if uploaded_files:
         
         st.session_state.dataframes = dataframes
         st.session_state.new_df = DataProcessing(dataframes)
+        
+        st.session_state.new_df.to_excel('OverallData.xlsx')
 
     st.markdown(f"""<hr>""", unsafe_allow_html=True)
-# ------------------- DATA FILTER --------------------------
-col1, col2 = st.columns([1, 3])
+    col1, col2 = st.columns([1, 3])
 
-if st.session_state.new_df is not None and not st.session_state.new_df.empty:
-    with col1:
-        st.write("Filter")        
-        ring_id = st.multiselect(
-            "Break Ring Status",
-            options=st.session_state.new_df['Break Ring Status'].unique(),
-        )
+    if st.session_state.new_df is not None and not st.session_state.new_df.empty:
+        with col1:
+            ringID, subcon, state, region = CreateMultiselect(st.session_state.new_df)
         
-        subcon = st.multiselect(
-            "Subcon",
-            options=st.session_state.new_df['Subcon'].unique(),
-        )
-        state = st.multiselect(
-            "State Name",
-            options=st.session_state.new_df['State'].unique(),
-        )
-        region = st.multiselect(
-            "Region",
-            options=st.session_state.new_df['Region'].unique(),
-        )
+        df = DataFiltering(st.session_state.new_df, ringID, subcon, state, region)
+        
+        with col2:
+            st.dataframe(df, hide_index=True)
+        
+        st.markdown(f"""<hr>""", unsafe_allow_html=True)
 
-    # ---------- DATA FILTERING -------------
-    df_selection = st.session_state.new_df.copy()
-    
-    if ring_id:
-        df_selection = df_selection[df_selection['Break Ring Status'].isin(ring_id)]
-    if subcon:
-        df_selection = df_selection[df_selection['Subcon'].isin(subcon)]
-    if state:
-        df_selection = df_selection[df_selection['State'].isin(state)]
-    if region:
-        df_selection = df_selection[df_selection['Region'].isin(region)]
-        
-    with col2:
-        st.dataframe(df_selection, hide_index=True)
-        
-    
-    st.markdown(f"""<hr>""", unsafe_allow_html=True)
-    DataVisualization(st.session_state.new_df)
+################################ DASHBOARD ################################
+        dashboard = Dashboard(st.session_state.new_df) 
+
+        dashboard.PieChart()  
+        dashboard.BarGraph()  
+   
