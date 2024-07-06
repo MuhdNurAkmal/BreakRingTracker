@@ -115,7 +115,7 @@ class Dashboard:
                 col1.plotly_chart(fig, config=self.config)
 
                 with col3:
-                    st.markdown(f"<div style='padding-top: 10em;'>", unsafe_allow_html=True)
+                    st.html("<div style='padding-top: 10em;'>")
                     st.metric(f"Not Available", na_count)
                     st.metric(f"To Be Announced", tba_count)
-                    st.markdown("</div>", unsafe_allow_html=True)
+                    st.html("</div>")

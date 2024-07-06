@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import base64
+import time
 import plotly.express as px
 
 from process.dataViz import Dashboard
@@ -16,8 +17,7 @@ with open("assets/logoHuawei.png", "rb") as img_file:
 with open("assets/CDBLogo.png", "rb") as img_file:
     cd_logo = base64.b64encode(img_file.read()).decode()
 
-st.markdown(
-    f"""
+st.markdown(f"""
     <style>
     .header {{
         display: flex;
@@ -70,18 +70,16 @@ if uploaded_files:
         st.session_state.dataframes = dataframes
         st.session_state.new_df = DataProcessing(dataframes)
 
-    st.markdown(f"""<hr>""", unsafe_allow_html=True)
-    col1, col2 = st.columns([1, 3])
+    st.html("<hr>")
+    # col1, col2 = st.columns([1, 3])
     
     if st.session_state.new_df is not None and not st.session_state.new_df.empty:
-        with col1:
-            df = DataFiltering(st.session_state.new_df)
-        with col2:
-            st.dataframe(df, hide_index=True)
-            st.success(f"The table shows that {df.shape[0]} rows have been filtered.")
-    
-        st.markdown(f"""<hr>""", unsafe_allow_html=True)
-
+        df = DataFiltering(st.session_state.new_df)
+        st.dataframe(df, hide_index=True)
+        st.success(f"{df.shape[0]} rows of data have been shown.")
+                        
+        st.html("<hr>")
+                
 ################################ DASHBOARD ################################
         dashboard = Dashboard(st.session_state.new_df) 
 

@@ -1,20 +1,27 @@
 import streamlit as st
 
 def DataFiltering(df):
-    ringID = st.multiselect("Break Ring Status", options=df["Break Ring Status"].unique())
-    subcon = st.multiselect("Subcon", options=df["Subcon"].unique())
-    state = st.multiselect("State", options=df["State"].unique())
-    region = st.multiselect("Region", options=df["Region"].unique())
+    filter_options = {
+        "File Source": "Source",
+        "Batch": "Batch",
+        "Break Ring Status": "Break Ring Status",
+        "Priority": "Priority",
+        "State": "State",
+        "Region": "Region",
+        "Subcon": "Subcon",
+        "CME Status": "CME Status"
+    }
+
+    selections = {}
+    cols = st.columns(4)
+    
+    for idx, (label, column) in enumerate(filter_options.items()):
+        with cols[idx % 4]:
+            selections[column] = st.multiselect(label, options=df[column].unique())
     
     filtered_df = df.copy()
-    
-    if ringID:
-        filtered_df = filtered_df[filtered_df['Break Ring Status'].isin(ringID)]
-    if subcon:
-        filtered_df = filtered_df[filtered_df['Subcon'].isin(subcon)]
-    if state:
-        filtered_df = filtered_df[filtered_df['State'].isin(state)]
-    if region:
-        filtered_df = filtered_df[filtered_df['Region'].isin(region)]
+    for column, selected_values in selections.items():
+        if selected_values:
+            filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
     
     return filtered_df
