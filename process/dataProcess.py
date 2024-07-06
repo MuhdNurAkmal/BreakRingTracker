@@ -50,11 +50,12 @@ def DataProcessing(dataframes):
     merged_df = merged_df.fillna('N/A')
     merged_df['Break Ring Status'] = merged_df['Break Ring Status'].replace('completed', 'Completed')
     merged_df['Subcon'] = merged_df['Subcon'].str.upper()
-    columns_to_capitalize = ['Region', 'State']
+    
+    columns_to_capitalize = ['Region', 'State'] 
     for col in columns_to_capitalize:
         merged_df[col] = merged_df[col].str.title()
-    merged_df[['Region', 'State']] = merged_df[['Region', 'State']].replace('Tba', 'TBA')
     
+    merged_df[columns_to_capitalize] = merged_df[columns_to_capitalize].replace('Tba', 'TBA')
     merged_df.sort_values(by=['Ring ID'], inplace=True)
     
     return merged_df

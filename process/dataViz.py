@@ -13,8 +13,7 @@ class Dashboard:
             'Integration': ['Plan Integration', 'Actual Integration'],
             'Migration': ['Plan Migration', 'Actual Migration']
         }
-        self.config = {'staticPlot': True,
-                       }
+        self.config = {'staticPlot': True}
         
     def PieChart(self):
         status_counts = self.df['Break Ring Status'].value_counts().reset_index()
