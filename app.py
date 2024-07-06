@@ -5,7 +5,7 @@ import plotly.express as px
 
 from process.dataViz import Dashboard
 from process.dataProcess import DataProcessing
-from process.dataFilter import CreateMultiselect, DataFiltering
+from process.dataFilter import DataFiltering
 
 # ------------------- PAGE SETUP ---------------------------
 st.set_page_config(page_title="Break Ring Dashboard", layout='wide')
@@ -72,16 +72,14 @@ if uploaded_files:
 
     st.markdown(f"""<hr>""", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 3])
-
+    
     if st.session_state.new_df is not None and not st.session_state.new_df.empty:
         with col1:
-            ringID, subcon, state, region = CreateMultiselect(st.session_state.new_df)
-        
-        df = DataFiltering(st.session_state.new_df, ringID, subcon, state, region)
-        
+            df = DataFiltering(st.session_state.new_df)
         with col2:
             st.dataframe(df, hide_index=True)
-        
+            st.success(f"The table shows that {df.shape[0]} rows have been filtered.")
+    
         st.markdown(f"""<hr>""", unsafe_allow_html=True)
 
 ################################ DASHBOARD ################################
