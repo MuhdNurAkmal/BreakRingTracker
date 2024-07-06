@@ -89,6 +89,7 @@ if uploaded_files:
 ################################ DASHBOARD ################################
         dashboard = Dashboard(st.session_state.new_df) 
 
-        dashboard.PieChart()  
+        dashboard.PieChart()
+        dashboard.HorizontalBarGraph()
         dashboard.BarGraph()  
    
