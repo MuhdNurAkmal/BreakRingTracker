@@ -68,13 +68,11 @@ if uploaded_files:
         
         st.session_state.dataframes = dataframes
         st.session_state.new_df = DataProcessing(dataframes)
-
-        st.session_state.new_df.to_excel('Overall.xlsx')
-        
+                
     st.html("<hr>")
-    st.title("Table", anchor=False)
     
     if st.session_state.new_df is not None and not st.session_state.new_df.empty:
+        st.title("Table", anchor=False)
         df = DataFiltering(st.session_state.new_df)
         st.dataframe(df, hide_index=True)
         st.success(f"{df.shape[0]} rows of data have been shown.")
