@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 import base64
-import time
 import plotly.express as px
 
 from process.dataViz import Dashboard
@@ -24,7 +23,7 @@ st.markdown(f"""
         justify-content: space-between;
         align-items: center;
     }}
-    .title h1 {{
+    .title h2 {{
         font-size: 3rem;
     }}
     .logo {{
@@ -38,7 +37,7 @@ st.markdown(f"""
     
     <div class="header">
         <div class="title">
-            <h1>Break Ring Tracker
+            <h2>Break Ring Tracker</h2>
         </div>
         <div class="logo">
             <img src="data:image/png;base64,{huawei_logo}">
@@ -70,8 +69,10 @@ if uploaded_files:
         st.session_state.dataframes = dataframes
         st.session_state.new_df = DataProcessing(dataframes)
 
+        st.session_state.new_df.to_excel('Overall.xlsx')
+        
     st.html("<hr>")
-    # col1, col2 = st.columns([1, 3])
+    st.title("Table", anchor=False)
     
     if st.session_state.new_df is not None and not st.session_state.new_df.empty:
         df = DataFiltering(st.session_state.new_df)
@@ -81,9 +82,8 @@ if uploaded_files:
         st.html("<hr>")
                 
 ################################ DASHBOARD ################################
+        st.title("Dashboard", anchor=False)
         dashboard = Dashboard(st.session_state.new_df) 
-
         dashboard.PieChart()
         dashboard.HorizontalBarGraph()
-        dashboard.BarGraph()  
-   
+        dashboard.BarGraph()

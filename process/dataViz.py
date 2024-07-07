@@ -13,46 +13,52 @@ class Dashboard:
             'Integration': ['Plan Integration', 'Actual Integration'],
             'Migration': ['Plan Migration', 'Actual Migration']
         }
-        self.config = {'staticPlot': True}
+        self.config = {'staticPlot': False}
         
     def PieChart(self):
         status_counts = self.df['Break Ring Status'].value_counts().reset_index()
         status_counts.columns = ['Status', 'Count']
-
+        
+        color_sequence = px.colors.qualitative.G10
+        
         fig = px.pie(
             status_counts,
             names='Status',
             values='Count',
             title='Break Ring Status',
-            hole=0.3
+            hole=0.3,
+            color_discrete_sequence=color_sequence,
         )
         
         st.plotly_chart(fig, config=self.config)
 
-    def BarGraphGenerator(self, category, plan_col, actual_col):      
-        self.df[plan_col] = pd.to_datetime(self.df[plan_col], errors='coerce')
-        self.df[actual_col] = pd.to_datetime(self.df[actual_col], errors='coerce')
+    def BarGraphGenerator(self, category, plan_col, actual_col):
+        dff = self.df.copy()
+        dff[plan_col] = pd.to_datetime(dff[plan_col], errors='coerce')
+        dff[actual_col] = pd.to_datetime(dff[actual_col], errors='coerce')
+              
+        dff[plan_col] = dff[plan_col].dt.to_period('M').astype(str)
+        dff[actual_col] = dff[actual_col].dt.to_period('M').astype(str)
         
-        self.df[plan_col] = self.df[plan_col].dt.to_period('M').astype(str)
-        self.df[actual_col] = self.df[actual_col].dt.to_period('M').astype(str)
-        
-        plan_counts = self.df[plan_col].value_counts().sort_index().reset_index()
+        plan_counts = dff[plan_col].value_counts().sort_index().reset_index()
         plan_counts.columns = ['Month', 'Count']
         plan_counts['Type'] = 'Plan'
 
-        actual_counts = self.df[actual_col].value_counts().sort_index().reset_index()
+        actual_counts = dff[actual_col].value_counts().sort_index().reset_index()
         actual_counts.columns = ['Month', 'Count']
         actual_counts['Type'] = 'Actual'
 
         combined_counts = pd.concat([plan_counts, actual_counts])
-
+        color_sequence = px.colors.qualitative.T10
+        
         fig = px.bar(
             combined_counts,
             x='Month',
             y='Count',
             color='Type',
             barmode='group',
-            title=f'{category} Plan vs Actual'
+            title=f'Plan vs Actual : {category}',
+            color_discrete_sequence=color_sequence
         )
         
         fig.update_xaxes(type='category', title_text='Month')
@@ -74,6 +80,14 @@ class Dashboard:
     
     def HorizontalBarGraph(self):
         geography = ['State', 'Region']
+        colors = {
+            'State': 'rgba(0, 128, 128, 0.6)',
+            'Region': 'rgba(255, 127, 80, 0.6)'
+        }
+        line_colors = {
+            'State': 'rgba(0, 128, 128, 1.0)',
+            'Region': 'rgba(255, 127, 80, 1.0)'
+        }
 
         for geo_level in geography:
             if geo_level in self.df.columns:
@@ -93,9 +107,9 @@ class Dashboard:
                     textposition='outside',
                     textfont=dict(size=14, color='black', family='Arial'),
                     marker=dict(
-                        color='rgba(50, 171, 96, 0.6)',
+                        color=colors[geo_level],
                         line=dict(
-                            color='rgba(50, 171, 96, 1.0)',
+                            color=line_colors[geo_level],
                             width=1
                         )
                     ),
